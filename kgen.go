@@ -68,7 +68,7 @@ func Main() int {
 	secret := flag.Int("secret", 1, "This is your secret key")
 
 	flag.Usage = func() {
-		println("Usage: vigenere [-d] [-key key] string")
+		println("Usage: dhkeygen [-modulus modulus] [-base base] [-publicKey publicKey] [-secret secret]")
 		flag.PrintDefaults()
 	}
 
