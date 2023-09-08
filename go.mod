@@ -1,3 +1,3 @@
-module github.com/JoumanaE/kgen
+module github.com/joumanae/kgen
 
 go 1.20

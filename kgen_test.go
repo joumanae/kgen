@@ -4,7 +4,7 @@ import (
 	"math/big"
 	"testing"
 
-	"github.com/JoumanaE/kgen"
+	"github.com/joumanae/kgen"
 )
 
 func FuzzTestPublicKey(f *testing.F) {

@@ -3,7 +3,7 @@ package main
 import (
 	"os"
 
-	"github.com/JoumanaE/kgen"
+	"github.com/joumanae/kgen"
 )
 
 func main() {

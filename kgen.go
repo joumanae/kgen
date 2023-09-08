@@ -60,7 +60,6 @@ func SharedKey(publicKey *big.Int, secret int, modulus int) (*big.Int, error) {
 
 func Main() int {
 
-	dhkeygen := flag.Bool("dhkeygen", false, "Runs the Diffie Hillman key exchange")
 	mod := flag.Int("modulus", 1, "The modulus is a prime number")
 	base := flag.Int("base", 1, "base")
 	pubKey := flag.String("publicKey", "", "This is the public key")
@@ -74,29 +73,27 @@ func Main() int {
 
 	flag.Parse()
 
-	if *dhkeygen {
-		if len(*pubKey) == 0 {
+	if len(*pubKey) == 0 {
 
-			pn1, err := PublicKey(*base, *mod, secretKey)
-			if err != nil {
-				fmt.Println("Modulus cannot be 0")
-				os.Exit(1)
-			}
-			fmt.Printf("This is your public key: %s, & this is your secret key %v.", pn1, secretKey)
-		} else {
-			pk, ok := ParseBigInt(*pubKey)
-			if !ok {
-				fmt.Println("Your public key is not valid")
-				os.Exit(1)
-			}
-
-			sk, err := SharedKey(pk, *secret, *mod)
-			if err != nil {
-				fmt.Println("Modulus cannot be 0")
-				os.Exit(1)
-			}
-			fmt.Printf("This is your shared key %s", sk)
+		pn1, err := PublicKey(*base, *mod, secretKey)
+		if err != nil {
+			fmt.Println("Modulus cannot be 0")
+			os.Exit(1)
 		}
+		fmt.Printf("This is your public key: %s, & this is your secret key %v.", pn1, secretKey)
+	} else {
+		pk, ok := ParseBigInt(*pubKey)
+		if !ok {
+			fmt.Println("Your public key is not valid")
+			os.Exit(1)
+		}
+
+		sk, err := SharedKey(pk, *secret, *mod)
+		if err != nil {
+			fmt.Println("Modulus cannot be 0")
+			os.Exit(1)
+		}
+		fmt.Printf("This is your shared key %s", sk)
 	}
 
 	return 0
