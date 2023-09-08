@@ -2,9 +2,11 @@ package kgen_test
 
 import (
 	"math/big"
+	"os"
 	"testing"
 
 	"github.com/joumanae/kgen"
+	"github.com/rogpeppe/go-internal/testscript"
 )
 
 func FuzzTestPublicKey(f *testing.F) {
@@ -55,4 +57,20 @@ func TestParseBigInt(t *testing.T) {
 	if got.Cmp(want) != 0 {
 		t.Errorf("want %v, got %v", want, got)
 	}
+}
+
+func TestScript(t *testing.T) {
+	testscript.Run(t, testscript.Params{
+		Dir: "testdata/script",
+	})
+}
+
+func TestMain(m *testing.M) {
+	os.Exit(testscript.RunMain(m, map[string]func() int{
+		"kgen": kgen.Main,
+	}))
+}
+
+func TestPower(t *testing.T) {
+
 }

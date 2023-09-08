@@ -1,0 +1,3 @@
+! exec kgen -modulus=0 
+stdout 'Modulus cannot be 0'
+! exec kgen -base=0 
