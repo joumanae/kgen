@@ -72,5 +72,42 @@ func TestMain(m *testing.M) {
 }
 
 func TestPower(t *testing.T) {
+	w := big.NewInt(int64(10000))
+	base := big.NewInt(int64(10))
+	g := kgen.Power(base, 4)
+	if w.Cmp(g) != 0 {
+		t.Errorf("want %v, got %v", w, g)
+	}
+}
 
+func TestGenerateKey(t *testing.T) {
+	got := kgen.GenerateSecretKey()
+	if got <= 1 {
+		t.Error("Cannot have a generated secret key that is inferior to 1")
+	}
+}
+
+func TestPublicKey(t *testing.T) {
+	want := big.NewInt(int64(5))
+	got, err := kgen.PublicKey(5, 13, 5)
+	if err != nil {
+		t.Error(err)
+	}
+	if want.Cmp(got) != 0 {
+		t.Errorf("want %v, got %v", want, got)
+
+	}
+}
+
+func TestSharedKey(t *testing.T) {
+	// need to figure out what is the equivalent of 368 in int64
+	publicKey := big.NewInt(int64(3))
+	want := big.NewInt(int64(9))
+	got, err := kgen.SharedKey(publicKey, 368, 13)
+	if err != nil {
+		t.Error(err)
+	}
+	if want.Cmp(got) != 0 {
+		t.Errorf("want %v, got %v", want, got)
+	}
 }

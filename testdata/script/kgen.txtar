@@ -1,3 +1,15 @@
 ! exec kgen -modulus=0 
-stdout 'Modulus cannot be 0'
+stdout 'Modulus cannot be negative or equal to zero'
 ! exec kgen -base=0 
+stdout 'Base cannot be negative or equal to zero'
+! exec kgen -modulus=0 -publicKey=3 -secret=368
+stdout 'Modulus cannot be negative or equal to zero'
+exec kgen -modulus=13 -publicKey=3 -secret=368 
+stdout 'This is your shared key 9' 
+exec kgen 
+stdout 'This is your public key: \d+, & this is your secret key \d+'
+! exec kgen -publicKey=poussin
+stdout 'Your public key is not valid'
+! exec kgen -mod -b -p 
+stdout  'flag provided but not defined: -mod'+ \n+'Usage: kgen [-modulus modulus] [-base base] [-publicKey publicKey] [-secret secret]
+            [exit status 2]'
