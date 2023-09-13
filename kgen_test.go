@@ -71,7 +71,7 @@ func TestMain(m *testing.M) {
 	}))
 }
 
-func TestPower(t *testing.T) {
+func TestThatPowerCalculatesTheBigIntToThePowerOfInt(t *testing.T) {
 	w := big.NewInt(int64(10000))
 	base := big.NewInt(int64(10))
 	g := kgen.Power(base, 4)
@@ -80,14 +80,14 @@ func TestPower(t *testing.T) {
 	}
 }
 
-func TestGenerateKey(t *testing.T) {
+func TestThatSecretKeyOnceGeneratedIsGreaterThanOne(t *testing.T) {
 	got := kgen.GenerateSecretKey()
 	if got <= 1 {
 		t.Error("Cannot have a generated secret key that is inferior to 1")
 	}
 }
 
-func TestPublicKey(t *testing.T) {
+func TestThatPublicKeyCalculatesPublicKeyPerDHRules(t *testing.T) {
 	want := big.NewInt(int64(5))
 	got, err := kgen.PublicKey(5, 13, 5)
 	if err != nil {
