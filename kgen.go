@@ -66,8 +66,9 @@ func Main() int {
 	secretKey := GenerateSecretKey()
 	secret := flag.Int("secret", 1, "This is your secret key")
 
-	flag.Usage = func() {
-		println("Usage: kgen [-modulus modulus] [-base base] [-publicKey publicKey] [-secret secret]")
+	if len(os.Args[1:]) < 1 {
+		fmt.Fprintln(os.Stderr, "Usage: kgen [-modulus modulus] [-base base] [-publicKey publicKey] [-secret secret]")
+		return 1
 	}
 
 	flag.Parse()
