@@ -66,13 +66,7 @@ func Main() int {
 	secretKey := GenerateSecretKey()
 	secret := flag.Int("secret", 1, "This is your secret key")
 
-	if len(os.Args[1:]) < 1 {
-		fmt.Fprintln(os.Stderr, "Usage: kgen [-modulus modulus] [-base base] [-publicKey publicKey] [-secret secret]")
-		return 1
-	}
-
 	flag.Parse()
-
 	if len(*pubKey) == 0 {
 
 		pn1, err := PublicKey(*base, *mod, secretKey)
@@ -85,7 +79,17 @@ func Main() int {
 			}
 			os.Exit(1)
 		}
-		fmt.Printf("This is your public key: %s, & this is your secret key %v.", pn1, secretKey)
+
+		if len(os.Args[1:]) < 1 {
+			fmt.Fprintf(os.Stdout,
+				`
+			This is your public key: %s, & this is your secret key %v.\n,
+			Kgen automatically generates a public key for you. 
+			If you wanted to specify your own modulus, base or public key, 
+			take a look at the usage: kgen [-modulus modulus] [-base base] [-publicKey publicKey] [-secret secret]
+			`,
+				pn1, secretKey)
+		}
 	} else {
 		pk, ok := ParseBigInt(*pubKey)
 		if !ok {
@@ -100,6 +104,5 @@ func Main() int {
 		}
 		fmt.Printf("This is your shared key %s", sk)
 	}
-
 	return 0
 }

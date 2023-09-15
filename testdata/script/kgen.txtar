@@ -8,8 +8,6 @@ exec kgen -modulus=13 -publicKey=3 -secret=368
 stdout 'This is your shared key 9' 
 ! exec kgen -publicKey=poussin
 stdout 'Your public key is not valid'
-# With no arguments, fail and print a usage message
-! exec kgen 
-! stdout .
-stderr 'Usage: kgen [-modulus modulus] [-base base] [-publicKey publicKey] [-secret secret]'
-
+exec kgen
+stdout 'usage'
+		

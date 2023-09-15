@@ -1,6 +1,7 @@
 package kgen_test
 
 import (
+	"fmt"
 	"math/big"
 	"os"
 	"testing"
@@ -71,7 +72,7 @@ func TestMain(m *testing.M) {
 	}))
 }
 
-func TestThatPowerCalculatesTheBigIntToThePowerOfInt(t *testing.T) {
+func TestPowerCalculatesTheBigIntToThePowerOfInt(t *testing.T) {
 	w := big.NewInt(int64(10000))
 	base := big.NewInt(int64(10))
 	g := kgen.Power(base, 4)
@@ -80,7 +81,7 @@ func TestThatPowerCalculatesTheBigIntToThePowerOfInt(t *testing.T) {
 	}
 }
 
-func TestThatSecretKeyOnceGeneratedIsGreaterThanOne(t *testing.T) {
+func TestSecretKeyOnceGeneratedIsGreaterThanOne(t *testing.T) {
 	got := kgen.GenerateSecretKey()
 	if got <= 1 {
 		t.Error("Cannot have a generated secret key that is inferior to 1")
@@ -110,4 +111,11 @@ func TestSharedKey(t *testing.T) {
 	if want.Cmp(got) != 0 {
 		t.Errorf("want %v, got %v", want, got)
 	}
+}
+
+func ExamplePower() {
+	base := big.NewInt(int64(10))
+	fmt.Println(kgen.Power(base, 2))
+	// Output:
+	// 100
 }
