@@ -7,15 +7,29 @@ import (
 	"math/big"
 	"math/rand"
 	"os"
+
+	"github.com/credentials/safeprime"
 )
 
-var ErrZeroOrNegativeModulus = errors.New("the modulus cannot be 0 or negative")
+var ErrModulusTooSmall = errors.New("the modulus is under 256 bytes")
 var ErrZeroOrNegativeBase = errors.New("the base cannot be 0 or negative")
 
 // GenerateSecretKey is a function that gnerates a random secret key
 func GenerateSecretKey() int {
 	secret := rand.Intn(1000) + 1
 	return secret
+}
+
+func GenerateModulus() (*big.Int, error) {
+	m, err := safeprime.Generate(2048)
+	if err != nil {
+		return m, err
+	}
+	mstring := m.String()
+	if len(mstring) < 256 {
+		return m, ErrModulusTooSmall
+	}
+	return m, nil
 }
 
 // Power is a function that calculates  a *big.Int  to the power of a number and return a *big.Int
@@ -34,49 +48,49 @@ func ParseBigInt(s string) (*big.Int, bool) {
 }
 
 // PublicKey is a function that calculates the public key
-func PublicKey(base int, modulus int, secretKey int) (*big.Int, error) {
-	if modulus == 0 || modulus < 0 {
-		return nil, ErrZeroOrNegativeModulus
-	}
+func PublicKey(base int, modulus *big.Int, secretKey int) (*big.Int, error) {
 	if base == 0 || base < 0 {
 		return nil, ErrZeroOrNegativeBase
 	}
 
 	p := Power(big.NewInt(int64(base)), secretKey)
-	p.Mod(p, big.NewInt(int64(modulus)))
+	m, err := GenerateModulus()
+	if err != nil {
+		panic(err)
+	}
+	p.Mod(p, m)
 	return p, nil
 }
 
 // SharedKey is a function that calculate the shared key
-func SharedKey(publicKey *big.Int, secret int, modulus int) (*big.Int, error) {
-	if modulus == 0 || modulus < 0 {
-		return nil, ErrZeroOrNegativeModulus
-	}
+func SharedKey(publicKey *big.Int, secret int, modulus *big.Int) (*big.Int, error) {
 
 	p := Power(publicKey, secret)
-	p = p.Mod(p, big.NewInt(int64(modulus)))
+	m, err := GenerateModulus()
+	if err != nil {
+		panic(err)
+	}
+	p.Mod(p, m)
 	return p, nil
 }
 
 func Main() int {
 
-	mod := flag.Int("modulus", 1, "The modulus is a prime number")
 	base := flag.Int("base", 1, "base")
 	pubKey := flag.String("publicKey", "", "This is the public key")
 	secretKey := GenerateSecretKey()
+	modulus, err := GenerateModulus()
+	if err != nil {
+		panic(err)
+	}
 	secret := flag.Int("secret", 1, "This is your secret key")
 
 	flag.Parse()
 	if len(*pubKey) == 0 {
 
-		pn1, err := PublicKey(*base, *mod, secretKey)
+		pn1, err := PublicKey(*base, modulus, secretKey)
 		if err != nil {
-			if *mod <= 0 {
-				fmt.Println("Modulus cannot be negative or equal to zero")
-			}
-			if *base <= 0 {
-				fmt.Println("Base cannot be negative or equal to zero")
-			}
+			fmt.Printf("an error occured %s", err)
 			os.Exit(1)
 		}
 
@@ -97,7 +111,7 @@ func Main() int {
 			os.Exit(1)
 		}
 
-		sk, err := SharedKey(pk, *secret, *mod)
+		sk, err := SharedKey(pk, *secret, modulus)
 		if err != nil {
 			fmt.Println("Modulus cannot be negative or equal to zero")
 			os.Exit(1)
