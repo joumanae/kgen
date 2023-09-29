@@ -21,17 +21,19 @@ func GenerateSecretKey() int {
 }
 
 func GenerateModulus() (*big.Int, error) {
-	stop := make(chan struct{})
-	modulus, err := safeprime.Generate(2048, stop)
+	modulus, err := safeprime.Generate(256, nil)
 	if err != nil {
+
 		return nil, err
+
 	}
 	if len(modulus.Bytes()) < 256 {
 
 		return nil, ErrModulusTooSmall
 	}
-	stop <- struct{}{}
+
 	return modulus.Go(), nil
+
 }
 
 // Power is a function that calculates  a *big.Int  to the power of a number and return a *big.Int
