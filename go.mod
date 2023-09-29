@@ -3,12 +3,12 @@ module github.com/joumanae/kgen
 go 1.20
 
 require (
-	github.com/credentials/safeprime v0.0.0-20180723204434-215fbc7208bf
+	github.com/privacybydesign/gabi v0.0.0-20230831075606-4e3065ad82c8
 	github.com/rogpeppe/go-internal v1.11.0
 )
 
 require (
-	github.com/rainycape/dl v0.0.0-20151222075243-1b01514224a1 // indirect
-	golang.org/x/sys v0.0.0-20220722155257-8c9f86f7a55f // indirect
+	github.com/go-errors/errors v1.4.2 // indirect
+	golang.org/x/sys v0.6.0 // indirect
 	golang.org/x/tools v0.1.12 // indirect
 )

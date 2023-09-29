@@ -8,7 +8,7 @@ import (
 	"math/rand"
 	"os"
 
-	"github.com/credentials/safeprime"
+	"github.com/privacybydesign/gabi/safeprime"
 )
 
 var ErrModulusTooSmall = errors.New("the modulus is under 256 bytes")
@@ -21,14 +21,12 @@ func GenerateSecretKey() int {
 }
 
 func GenerateModulus() (*big.Int, error) {
-	m, err := safeprime.Generate(2048)
+	stop := make(chan struct{})
+	m, err := safeprime.Generate(2048, stop)
 	if err != nil {
-		return m, err
+		return m, fmt.Errorf("issue generating the modulus %v", err)
 	}
-	mstring := m.String()
-	if len(mstring) < 256 {
-		return m, ErrModulusTooSmall
-	}
+	stop <- struct{}{}
 	return m, nil
 }
 
