@@ -8,6 +8,7 @@ import (
 	"math/rand"
 	"os"
 
+	gabibig "github.com/privacybydesign/gabi/big"
 	"github.com/privacybydesign/gabi/safeprime"
 )
 
@@ -20,20 +21,30 @@ func GenerateSecretKey() int {
 	return secret
 }
 
-func GenerateModulus() (*big.Int, error) {
-	modulus, err := safeprime.Generate(256, nil)
+func MustGenerateModulus() *big.Int {
+	modulus, err := safeprime.Generate(2048, nil)
+
 	if err != nil {
-
-		return nil, err
-
+		panic(err)
 	}
+	m, err := ConvertToBigInt(modulus)
+	if err != nil {
+		panic(err)
+	}
+	return m
+}
+
+// IsGreaterThan256Bytes checks that the modulus is greater
+// true and the error is nil
+// false and an error
+
+func ConvertToBigInt(modulus *gabibig.Int) (*big.Int, error) {
+
 	if len(modulus.Bytes()) < 256 {
-
-		return nil, ErrModulusTooSmall
+		return nil, errors.New("the modulus is under 256 bytes")
 	}
-
+	fmt.Printf("modulus %v", modulus.Go())
 	return modulus.Go(), nil
-
 }
 
 // Power is a function that calculates  a *big.Int  to the power of a number and return a *big.Int
@@ -58,10 +69,8 @@ func PublicKey(base int, modulus *big.Int, secretKey int) (*big.Int, error) {
 	}
 
 	p := Power(big.NewInt(int64(base)), secretKey)
-	m, err := GenerateModulus()
-	if err != nil {
-		panic(err)
-	}
+	m := MustGenerateModulus()
+
 	p.Mod(p, m)
 	return p, nil
 }
@@ -70,29 +79,23 @@ func PublicKey(base int, modulus *big.Int, secretKey int) (*big.Int, error) {
 func SharedKey(publicKey *big.Int, secret int, modulus *big.Int) (*big.Int, error) {
 
 	p := Power(publicKey, secret)
-	m, err := GenerateModulus()
-	if err != nil {
-		panic(err)
-	}
+	m := MustGenerateModulus()
 	p.Mod(p, m)
 	return p, nil
 }
 
 func Main() int {
 
-	base := flag.Int("base", 1, "base")
+	base := 2
 	pubKey := flag.String("publicKey", "", "This is the public key")
 	secretKey := GenerateSecretKey()
-	modulus, err := GenerateModulus()
-	if err != nil {
-		panic(err)
-	}
+	modulus := MustGenerateModulus()
 	secret := flag.Int("secret", 1, "This is your secret key")
 
 	flag.Parse()
 	if len(*pubKey) == 0 {
 
-		pn1, err := PublicKey(*base, modulus, secretKey)
+		pn1, err := PublicKey(base, modulus, secretKey)
 		if err != nil {
 			fmt.Printf("an error occured %s", err)
 			os.Exit(1)
@@ -103,8 +106,9 @@ func Main() int {
 				`
 			This is your public key: %s, & this is your secret key %v.\n,
 			Kgen automatically generates a public key for you. 
-			If you wanted to specify your own modulus, base or public key, 
-			take a look at the usage: kgen [-modulus modulus] [-base base] [-publicKey publicKey] [-secret secret]
+			It also generates the modulus and the base for you. 
+			Once your public key is generated, use the public key flag to get your 
+			shared secret key. 
 			`,
 				pn1, secretKey)
 		}

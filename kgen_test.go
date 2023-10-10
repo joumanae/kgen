@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/joumanae/kgen"
+	gabibig "github.com/privacybydesign/gabi/big"
 	"github.com/rogpeppe/go-internal/testscript"
 )
 
@@ -65,7 +66,6 @@ func TestThatPublicKeyCalculatesPublicKeyPerDHRules(t *testing.T) {
 }
 
 func TestSharedKey(t *testing.T) {
-	// need to figure out what is the equivalent of 368 in int64
 	publicKey := big.NewInt(int64(3))
 	want := big.NewInt(int64(9))
 	modulus := big.NewInt(int64(13))
@@ -85,9 +85,9 @@ func ExamplePower() {
 	// 100
 }
 
-func TestGenerateModulus(t *testing.T) {
-	m, err := kgen.GenerateModulus()
-	if err != kgen.ErrModulusTooSmall {
-		t.Errorf("Got the wrong error. want %v, got %v, modulus %v", kgen.ErrModulusTooSmall, err, m)
+func TestConvertToBigInt(t *testing.T) {
+	_, err := kgen.ConvertToBigInt(gabibig.NewInt(0))
+	if err == nil {
+		t.Fatal("want error when modulus does not follow DH criteria")
 	}
 }
