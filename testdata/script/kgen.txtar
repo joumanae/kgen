@@ -1,5 +1,10 @@
-! exec kgen -publicKey=poussin
+! exec kgen
+stdout 'Start'
+! exec kgen -start -publicKey=poussin
 stdout 'Your public key is not valid'
-exec kgen
-stdout 'usage'
-		
+! exec kgen -start -publicKey=30 -modulus=xy
+stdout 'Your modulus flag is not valid'
+exec kgen -start publicKey=7 -modulus=13
+stdout 'This'
+exec kgen -start -modulus=170141183460469231731687303715884105727
+stdout 'This'

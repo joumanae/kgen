@@ -21,6 +21,8 @@ func GenerateSecretKey() int {
 	return secret
 }
 
+// MustGenerateModulus generates a prime number that is 2048 bits
+// this makes the prime number safe for the DH key exchange.
 func MustGenerateModulus() *big.Int {
 	modulus, err := safeprime.Generate(2048, nil)
 
@@ -34,16 +36,13 @@ func MustGenerateModulus() *big.Int {
 	return m
 }
 
-// IsGreaterThan256Bytes checks that the modulus is greater
-// true and the error is nil
-// false and an error
-
+// ConvertToBigInt takes the modulus, checks that it is the correct size
+// for the DH key exchange, and converts it from *gabibig.Int to *big.Int.
 func ConvertToBigInt(modulus *gabibig.Int) (*big.Int, error) {
 
 	if len(modulus.Bytes()) < 256 {
 		return nil, errors.New("the modulus is under 256 bytes")
 	}
-	fmt.Printf("modulus %v", modulus.Go())
 	return modulus.Go(), nil
 }
 
@@ -64,23 +63,15 @@ func ParseBigInt(s string) (*big.Int, bool) {
 
 // PublicKey is a function that calculates the public key
 func PublicKey(base int, modulus *big.Int, secretKey int) (*big.Int, error) {
-	if base == 0 || base < 0 {
-		return nil, ErrZeroOrNegativeBase
-	}
-
 	p := Power(big.NewInt(int64(base)), secretKey)
-	m := MustGenerateModulus()
-
-	p.Mod(p, m)
+	p.Mod(p, modulus)
 	return p, nil
 }
 
 // SharedKey is a function that calculate the shared key
 func SharedKey(publicKey *big.Int, secret int, modulus *big.Int) (*big.Int, error) {
-
 	p := Power(publicKey, secret)
-	m := MustGenerateModulus()
-	p.Mod(p, m)
+	p.Mod(p, modulus)
 	return p, nil
 }
 
@@ -89,42 +80,44 @@ func Main() int {
 	base := 2
 	pubKey := flag.String("publicKey", "", "This is the public key")
 	secretKey := GenerateSecretKey()
-	modulus := MustGenerateModulus()
 	secret := flag.Int("secret", 1, "This is your secret key")
+	modulus := flag.String("modulus", "", "This is the generated modulus")
+	start := flag.Bool("start", false, "starts the program")
 
 	flag.Parse()
-	if len(*pubKey) == 0 {
 
-		pn1, err := PublicKey(base, modulus, secretKey)
-		if err != nil {
-			fmt.Printf("an error occured %s", err)
-			os.Exit(1)
-		}
+	if len(os.Args[1:]) < 1 {
+		fmt.Fprintf(os.Stdout, "Start the program by setting the boolean flag start to true.")
+		os.Exit(1)
+	}
+	if *start {
+		if len(*pubKey) == 0 {
+			modulus := MustGenerateModulus()
+			pn1, err := PublicKey(base, modulus, secretKey)
+			if err != nil {
+				fmt.Printf("an error occured %s", err)
+				os.Exit(1)
+			}
+			fmt.Fprintf(os.Stdout, "This is your public key: %s, & this is your secret key %v.", pn1, secretKey)
 
-		if len(os.Args[1:]) < 1 {
-			fmt.Fprintf(os.Stdout,
-				`
-			This is your public key: %s, & this is your secret key %v.\n,
-			Kgen automatically generates a public key for you. 
-			It also generates the modulus and the base for you. 
-			Once your public key is generated, use the public key flag to get your 
-			shared secret key. 
-			`,
-				pn1, secretKey)
+		} else {
+			pk, ok := ParseBigInt(*pubKey)
+			if !ok {
+				fmt.Println("Your public key is not valid.")
+				os.Exit(1)
+			}
+			m, ok := ParseBigInt(*modulus)
+			if !ok {
+				fmt.Println("Your modulus flag is not valid")
+				os.Exit(1)
+			}
+			sk, err := SharedKey(pk, *secret, m)
+			if err != nil {
+				fmt.Println("There was an issue generating the shared key.")
+				os.Exit(1)
+			}
+			fmt.Printf("This is your shared key %s", sk)
 		}
-	} else {
-		pk, ok := ParseBigInt(*pubKey)
-		if !ok {
-			fmt.Println("Your public key is not valid")
-			os.Exit(1)
-		}
-
-		sk, err := SharedKey(pk, *secret, modulus)
-		if err != nil {
-			fmt.Println("Modulus cannot be negative or equal to zero")
-			os.Exit(1)
-		}
-		fmt.Printf("This is your shared key %s", sk)
 	}
 	return 0
 }

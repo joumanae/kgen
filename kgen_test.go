@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math/big"
 	"os"
+	"reflect"
 	"testing"
 
 	"github.com/joumanae/kgen"
@@ -53,15 +54,14 @@ func TestSecretKeyOnceGeneratedIsGreaterThanOne(t *testing.T) {
 }
 
 func TestThatPublicKeyCalculatesPublicKeyPerDHRules(t *testing.T) {
-	want := big.NewInt(int64(1))
-	modulus := big.NewInt(int64(13))
-	got, err := kgen.PublicKey(1, modulus, 5)
+	want := big.NewInt(int64(5))
+	m := big.NewInt(int64(13))
+	got, err := kgen.PublicKey(5, m, 5)
 	if err != nil {
 		t.Error(err)
 	}
 	if want.Cmp(got) != 0 {
 		t.Errorf("want %v, got %v", want, got)
-
 	}
 }
 
@@ -86,8 +86,24 @@ func ExamplePower() {
 }
 
 func TestConvertToBigInt(t *testing.T) {
-	_, err := kgen.ConvertToBigInt(gabibig.NewInt(0))
+	m, err := kgen.ConvertToBigInt(gabibig.NewInt(0))
 	if err == nil {
 		t.Fatal("want error when modulus does not follow DH criteria")
+	}
+	typeOfm := fmt.Sprint(reflect.TypeOf(m))
+	if typeOfm != "*big.Int" {
+		t.Fatal("incorrect type. Not big.Int")
+	}
+}
+
+func TestThatMustGenerateModulusGeneratesAigInt(t *testing.T) {
+	m, err := kgen.ConvertToBigInt(gabibig.NewInt(109))
+	// Skip because this is testing the type and not worrying that big.Int is the correct number of bytes.
+	if err != nil {
+		t.Skip()
+	}
+	typeOfm := fmt.Sprint(reflect.TypeOf(m))
+	if typeOfm != "*big.Int" {
+		t.Fatal("Modulus is not the correct type")
 	}
 }
